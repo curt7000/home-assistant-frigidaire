@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import threading
-import traceback
 
-from homeassistant import data_entry_flow
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
@@ -51,23 +49,33 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             )
             persist_session_key(client.session_key, client.regional_base_url)
 
-            hass.data[DOMAIN][entry.entry_id] = client
+            # Fetch the appliance list once and share it across every platform
+            # (climate, humidifier, number, switch) instead of each calling the
+            # API separately.
+            appliances = client.get_appliances()
+            hass.data[DOMAIN][entry.entry_id] = {"client": client, "appliances": appliances}
         except ConnectionError as err:
             raise ConfigEntryNotReady("Cannot connect to Frigidaire") from err
         except frigidaire.FrigidaireException as err:
-            # Handle frigidaire 429 gracefully
-            if "cas_3403" in traceback.format_exc():
-                raise data_entry_flow.AbortFlow(
-                    "You have exceeded Frigidaire's maximum number of active sessions. "
-                    "Please log out of another device or wait until an existing session expires."
-                ) from err
-            raise data_entry_flow.AbortFlow("Frigidaire backend exception") from err
+            # Handle frigidaire's active-session cap (cas_3403) gracefully. Raise
+            # ConfigEntryNotReady so HA retries setup automatically rather than
+            # aborting — AbortFlow is only valid inside a config flow, not here.
+            if "cas_3403" in str(err):
+                raise ConfigEntryNotReady("Rate limited by Frigidaire. Will retry automatically.") from err
+            raise ConfigEntryNotReady(f"Frigidaire error during setup: {err}") from err
 
     await hass.async_add_executor_job(setup, entry.data["username"], entry.data["password"])
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
+    entry.async_on_unload(entry.add_update_listener(_async_update_listener))
+
     return True
+
+
+async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Reload the entry when options change so switch selection takes effect."""
+    await hass.config_entries.async_reload(entry.entry_id)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

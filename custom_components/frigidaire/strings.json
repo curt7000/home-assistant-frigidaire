@@ -6,15 +6,38 @@
           "username": "[%key:common::config_flow::data::username%]",
           "password": "[%key:common::config_flow::data::password%]"
         }
+      },
+      "device": {
+        "title": "Extra Controls — {device_name}",
+        "description": "Select which switch entities to expose for {device_name}. Only enable switches your device supports — unsupported settings will be silently ignored by the appliance.",
+        "data": {
+          "clean_air_mode": "Ionizer (Clean Air Mode)",
+          "display_light": "Display Light",
+          "ui_lock": "Child Lock"
+        }
       }
     },
     "error": {
       "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
       "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
+      "no_appliances": "No Frigidaire appliances found on this account.",
       "unknown": "[%key:common::config_flow::error::unknown%]"
     },
     "abort": {
       "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+    }
+  },
+  "options": {
+    "step": {
+      "device": {
+        "title": "Extra Controls — {device_name}",
+        "description": "Select which switch entities to expose for {device_name}. Only enable switches your device supports — unsupported settings will be silently ignored by the appliance.",
+        "data": {
+          "clean_air_mode": "Ionizer (Clean Air Mode)",
+          "display_light": "Display Light",
+          "ui_lock": "Child Lock"
+        }
+      }
     }
   }
 }

@@ -6,6 +6,7 @@
         "error": {
             "cannot_connect": "Failed to connect",
             "invalid_auth": "Invalid authentication",
+            "no_appliances": "No Frigidaire appliances found on this account.",
             "unknown": "Unexpected error"
         },
         "step": {
@@ -14,8 +15,30 @@
                     "password": "Password",
                     "username": "Username"
                 }
+            },
+            "device": {
+                "title": "Extra Controls — {device_name}",
+                "description": "Select which switch entities to expose for {device_name}. Only enable switches your device supports — unsupported settings will be silently ignored by the appliance.",
+                "data": {
+                    "clean_air_mode": "Ionizer (Clean Air Mode)",
+                    "display_light": "Display Light",
+                    "ui_lock": "Child Lock"
+                }
             }
         }
     },
-    "title": "frigidaire"
+    "options": {
+        "step": {
+            "device": {
+                "title": "Extra Controls — {device_name}",
+                "description": "Select which switch entities to expose for {device_name}. Only enable switches your device supports — unsupported settings will be silently ignored by the appliance.",
+                "data": {
+                    "clean_air_mode": "Ionizer (Clean Air Mode)",
+                    "display_light": "Display Light",
+                    "ui_lock": "Child Lock"
+                }
+            }
+        }
+    },
+    "title": "Frigidaire"
 }
